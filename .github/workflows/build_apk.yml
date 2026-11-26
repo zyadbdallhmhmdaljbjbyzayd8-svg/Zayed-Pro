@@ -37,10 +37,20 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           accept-android-sdk-licenses: true
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+
+      - name: Install Android SDK 35 packages
+        run: |
+          SDK_DIR="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER=$(find "$SDK_DIR" -name sdkmanager -type f 2>/dev/null | head -n 1)
+          echo "Using SDK_DIR=$SDK_DIR"
+          echo "Using SDKMANAGER=$SDKMANAGER"
+          if [ -n "$SDKMANAGER" ]; then
+            yes | "$SDKMANAGER" --sdk_root="$SDK_DIR" --licenses >/dev/null 2>&1 || true
+            "$SDKMANAGER" --sdk_root="$SDK_DIR" \
+              "platform-tools" \
+              "platforms;android-35" \
+              "build-tools;35.0.0"
+          fi
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
