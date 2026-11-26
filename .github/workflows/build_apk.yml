@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -33,20 +37,15 @@ jobs:
           java-version: "17"
           cache: gradle
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-android-sdk-licenses: true
-
-      - name: Install Android SDK 35 packages
+      - name: Prepare Android SDK licenses and packages
         run: |
-          SDK_DIR="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDK_DIR="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
           SDKMANAGER=$(find "$SDK_DIR" -name sdkmanager -type f 2>/dev/null | head -n 1)
-          echo "Using SDK_DIR=$SDK_DIR"
-          echo "Using SDKMANAGER=$SDKMANAGER"
+          echo "SDK_DIR=$SDK_DIR"
+          echo "SDKMANAGER=$SDKMANAGER"
           if [ -n "$SDKMANAGER" ]; then
             yes | "$SDKMANAGER" --sdk_root="$SDK_DIR" --licenses >/dev/null 2>&1 || true
-            "$SDKMANAGER" --sdk_root="$SDK_DIR" \
+            "$SDKMANAGER" --sdk_root="$SDK_DIR" --install \
               "platform-tools" \
               "platforms;android-35" \
               "build-tools;35.0.0"
